@@ -1,0 +1,6 @@
+{
+	"name" : "Rate My Professor BYU",
+	"version" : "1.0",
+	"description" : "Populate BYU registration pages with RMP reviews",
+	"manifest_version" : 2
+}
