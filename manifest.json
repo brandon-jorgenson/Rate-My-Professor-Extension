@@ -2,7 +2,7 @@
 	"name" : "Rate My Professor BYU",
 	"version" : "1.0",
 	"description" : "Populate BYU registration pages with RMP reviews",
-	"permissions": ["storage"],
+	"permissions": ["storage", "https://search.mtvnservices.com/*"],
 	"content_scripts": [ {
 		"js": [ "jquery-3.3.1.min.js", "background.js", "contentscript.js" ],
 		"matches": [ "http://y.byu.edu/ry/ae/prod/registration/cgi/regOfferings.cgi*", "https://y.byu.edu/ry/ae/prod/registration/cgi/regOfferings.cgi"]
@@ -10,6 +10,6 @@
 	"background": {
 		"scripts": ["background.js"],
 		"persistent": false
-	  },
+		},
 	"manifest_version" : 2
 }
