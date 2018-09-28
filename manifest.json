@@ -2,5 +2,10 @@
 	"name" : "Rate My Professor BYU",
 	"version" : "1.0",
 	"description" : "Populate BYU registration pages with RMP reviews",
+	"permissions": ["storage"],
+	"background": {
+		"scripts": ["background.js"],
+		"persistent": false
+	  },
 	"manifest_version" : 2
 }
