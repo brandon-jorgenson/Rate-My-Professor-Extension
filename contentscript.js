@@ -4,52 +4,46 @@ var table = document.getElementById("sectionStartHeader");
 var columnValue = 0;
 var found = false;
 if (table != null) {
+    var newCell;
     for (var i = 0, row; row = table.rows[i]; i++) {
         if (i == 0) {
             var ratingCell = row.insertCell(row.length);
             ratingCell.innerHTML = "Rating";
             ratingCell.style.backgroundColor = "#eff6fc";
+        } else {
+            var newCell = row.insertCell(row.length);
         }
         for (var j = 0, col; col = row.cells[j]; j++) {
             if (found && j == columnValue) {
-                var newCell = row.insertCell(row.length);
-                if(col.innerText.length > 6) {
-                var fullName = col.innerText;
-                console.log(fullName);
-                var splitName = fullName.split(/, | /);
-                var lastName = splitName[0];
-                var firstName = splitName[1];
-                var middleName = splitName[2];
-                lastName = lastName.toLowerCase();
-                lastName = lastName.trim();
-                firstName = firstName.toLowerCase();
-                middleName = middleName.toLowerCase();
-                console.log(fullName);
-                console.log(firstName);
-                console.log(lastName);
-                console.log(middleName);
-                myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A135";
-                
-                XMLRequest(myurl1,newCell);
-                if(newCell.innerHTML == "") {
-                    firstName = middleName;
-                    console.log(firstName);
+                if (col.innerText.length > 6) {
+                    newCell.innerHTML = "N/A";
+                    var fullName = col.innerText;
+                    var splitName = fullName.split(/, | /);
+                    var lastName = splitName[0];
+                    var firstName = splitName[1];
+                    if (splitName.length > 2) {
+                        var middleName = splitName[2];
+                        middleName = middleName.toLowerCase();
+                    }
+                    lastName = lastName.toLowerCase();
+                    lastName = lastName.trim();
+                    firstName = firstName.toLowerCase();
                     myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A135";
-                    console.log(myurl1);
-                    XMLRequest(myurl1,newCell);
+
+                    XMLRequest(myurl1, newCell);
+                    if (newCell.innerHTML == "N/A" && splitName.length > 2) {
+                        firstName = middleName;
+                        myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A135";
+                        XMLRequest(myurl1, newCell);
+                    }
                 }
-
             }
-        }
-
             if (col.innerHTML == "Instructor") {
                 columnValue = j;
                 found = true;
             }
-
         }
     }
-    console.log(columnValue);
 }
 
 function XMLRequest(myurl1, newCell) {
@@ -60,24 +54,16 @@ function XMLRequest(myurl1, newCell) {
         if (xhr.readyState == 4) {
             // JSON.parse does not evaluate the attacker's scripts.
             var resp = JSON.parse(xhr.responseText);
-            console.log(resp);
-            // console.log(resp.response.docs);
             var numFound = resp.response.numFound;
-            var profID = resp.response.docs[0].pk_id;
-            var profRating = resp.response.docs[0].averageratingscore_rf;
-            var profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
-            console.log(numFound);
-            console.log(profID);
-            console.log(profURL);
-            console.log(profRating);
-            var link = profRating.toString().link(profURL);
-            newCell.innerHTML = link;
-            //console.log(resp.response.numFound);
-            //return numFound;
-
+            if (numFound > 0) {
+                var profID = resp.response.docs[0].pk_id;
+                var profRating = resp.response.docs[0].averageratingscore_rf;
+                var profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
+                var link = "<a href=\"" + profURL + "\" target=\"_blank\">" + profRating + "</a>";
+                newCell.innerHTML = link;
+            }
         }
 
     }
     xhr.send();
-
 }
