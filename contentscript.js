@@ -15,7 +15,8 @@ if (table != null) {
         }
         for (var j = 0, col; col = row.cells[j]; j++) {
             if (found && j == columnValue) {
-                if (col.innerText.length > 6) {
+                var professor = col.innerText;
+                if (professor.indexOf(',') >= 0) {
                     newCell.innerHTML = "N/A";
                     var fullName = col.innerText;
                     var splitName = fullName.split(/, | /);
