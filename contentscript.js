@@ -1,10 +1,15 @@
-var myurl = "https://search.mtvnservices.com/typeahead/suggest/?solrformat=true&rows=20&defType=edismax&qf=teacherfirstname_t%5E2000+teacherlastname_t%5E2000+teacherfullname_t%5E2000+autosuggest&bf=pow(total_number_of_ratings_i%2C2.1)&sort=total_number_of_ratings_i+desc&siteName=rmp&rows=20&start=0&fl=pk_id+teacherfirstname_t+teacherlastname_t+total_number_of_ratings_i+averageratingscore_rf+schoolid_s&fq=&q=";
-//Searched for the table of professor options on the BYU registration page
+//Searches for the table of professor options on the BYU registration page
 var table = document.getElementById("sectionStartHeader");
-var columnValue = 0;
-var found = false;
+var className = "";
 if (table != null) {
+    var myurl = "https://search.mtvnservices.com/typeahead/suggest/?solrformat=true&rows=20&defType=edismax&qf=teacherfirstname_t%5E2000+teacherlastname_t%5E2000+teacherfullname_t%5E2000+autosuggest&bf=pow(total_number_of_ratings_i%2C2.1)&sort=total_number_of_ratings_i+desc&siteName=rmp&rows=20&start=0&fl=pk_id+teacherfirstname_t+teacherlastname_t+total_number_of_ratings_i+averageratingscore_rf+schoolid_s&fq=&q=";
     var newCell;
+    var columnValue = 0;
+    var found = false;
+    var classDiv = document.getElementsByClassName("tableTabBody");
+    var classDescription = classDiv[0].children[0].innerText;
+    className = classDescription.substr(0, classDescription.indexOf('-')); 
+    className = className.replace(/\s+/g, '');
     for (var i = 0, row; row = table.rows[i]; i++) {
         if (i == 0) {
             var ratingCell = row.insertCell(row.length);
@@ -55,16 +60,22 @@ function GetProfessorRating(myurl1, newCell, splitName, firstName, middleName, r
             //Add professor data if found
             if (numFound > 0) {
                 var profID = resp.response.docs[0].pk_id;
+                var realFirstName = resp.response.docs[0].teacherfirstname_t;
+                var realLastName = resp.response.docs[0].teacherlastname_t;
                 var profRating = resp.response.docs[0].averageratingscore_rf;
+                if(profRating != undefined) {
                 var profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
                 var link = "<a href=\"" + profURL + "\" target=\"_blank\">" + profRating + "</a>";
                 newCell.innerHTML = link;
                 var allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-                AddTooltip(newCell, allprofRatingsURL);
+                AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName);
             } else {
                 newCell.innerHTML = "N/A";
             }
-            //Try again with professor's middle name
+            } else {
+                newCell.innerHTML = "N/A";
+            }
+            //Try again with professor's middle name if it didn't work the first time
             if (newCell.innerHTML == "N/A" && splitName.length > 2 && runAgain) {
                 firstName = middleName;
                 myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A135";
@@ -77,7 +88,7 @@ function GetProfessorRating(myurl1, newCell, splitName, firstName, middleName, r
     xhr.send();
 }
 
-function AddTooltip(newCell, allprofRatingsURL) {
+function AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", allprofRatingsURL, true);
     xhr.onreadystatechange = function () {
@@ -87,6 +98,8 @@ function AddTooltip(newCell, allprofRatingsURL) {
             var easyRating = 0;
             var wouldTakeAgain = 0;
             var wouldTakeAgainNACount = 0;
+            var foundFirstReview = false;
+            var firstReview = "";
             for(var i = 0; i < resp.ratings.length; i++) {
                 easyRating += resp.ratings[i].rEasy;
                 if(resp.ratings[i].rWouldTakeAgain === "Yes") {
@@ -94,24 +107,40 @@ function AddTooltip(newCell, allprofRatingsURL) {
                 } else if (resp.ratings[i].rWouldTakeAgain === "N/A") {
                     wouldTakeAgainNACount++;
                 }
+                if(resp.ratings[i].rClass === className && !foundFirstReview) {
+                    firstReview = resp.ratings[i].rComments;
+                    foundFirstReview = true;
+                }
+            }
+            if(!foundFirstReview) {
+                firstReview = "N/A";
             }
             easyRating /= resp.ratings.length;
             if(resp.ratings.length >= 8 && wouldTakeAgainNACount < (resp.ratings.length / 2) ) {
-            wouldTakeAgain = ((wouldTakeAgain / (resp.ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString();
+            wouldTakeAgain = ((wouldTakeAgain / (resp.ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
             } else {
                 wouldTakeAgain = "N/A";
             }
             var div = document.createElement("div");
-            var title = document.createElement("h4");
+            var title = document.createElement("h3");
             title.textContent = "Rate My Professor Details";
+            var professorText = document.createElement("p");
+            professorText.textContent = "Professor Name: " + realFirstName + " " + realLastName;
             var easyRatingText = document.createElement("p");
-            easyRatingText.textContent = "Level of Difficulty" + ": " + easyRating.toFixed(1).toString();
+            easyRatingText.textContent = "Level of Difficulty" + ": " + easyRating.toFixed(1).toString() + "/5.0";
             var wouldTakeAgainText = document.createElement("p");
-            wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain + "%";
+            wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
+            var classText = document.createElement("p");
+            classText.textContent = "Most recent review for " + className + ":";
+            var commentText = document.createElement("p");
+            commentText.textContent = firstReview;
+            commentText.classList.add('paragraph');
             div.appendChild(title);
+            div.appendChild(professorText);
             div.appendChild(easyRatingText);
             div.appendChild(wouldTakeAgainText);
-            console.log(easyRating);
+            div.appendChild(classText);
+            div.appendChild(commentText);
             newCell.class = "tooltip";
             newCell.addEventListener("mouseenter", function () {
                 //Only create tooltip once
@@ -132,5 +161,4 @@ function AddTooltip(newCell, allprofRatingsURL) {
 
     }
     xhr.send();
-
 }

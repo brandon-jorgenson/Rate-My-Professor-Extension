@@ -1,6 +1,6 @@
 {
 	"name" : "Rate My BYU Professors",
-	"version" : "1.2",
+	"version" : "1.3",
 	"description" : "Get your potential professor's rating easily on the BYU registration page.",
 	"permissions": ["storage", "https://search.mtvnservices.com/*"],
 	"content_scripts": [ {
@@ -12,8 +12,8 @@
 		"scripts": ["background.js"],
 		"persistent": false
 		},
-		"icons": { "16": "byu_logo16.png",
-			"48": "byu_logo48.png",
-		 "128": "byu_logo128.png" },
+		"icons": { "16": "Images/byu_logo16.png",
+			"48": "Images/byu_logo48.png",
+		 "128": "Images/byu_logo128.png" },
 	"manifest_version" : 2
 }

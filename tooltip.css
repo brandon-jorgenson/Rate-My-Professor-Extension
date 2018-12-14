@@ -4,3 +4,7 @@
     padding: 5px;
 	background: rgb(238, 238, 238);
 }
+
+.paragraph {
+	max-width: 30em;
+}
