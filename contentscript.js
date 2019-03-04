@@ -55,7 +55,7 @@ function GetProfessorRating(myurl1, newCell, splitName, firstName, middleName, r
     xhr.open("GET", myurl1, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
-            console.log(xhr.responseText);
+            //console.log(xhr.responseText);
             var resp = JSON.parse(xhr.responseText);
             
             var numFound = resp.response.numFound;
