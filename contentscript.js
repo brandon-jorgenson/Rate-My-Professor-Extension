@@ -2,7 +2,7 @@
 var table = document.getElementById("sectionStartHeader");
 var className = "";
 if (table != null) {
-    var myurl = "https://search.mtvnservices.com/typeahead/suggest/?solrformat=true&rows=20&defType=edismax&qf=teacherfirstname_t%5E2000+teacherlastname_t%5E2000+teacherfullname_t%5E2000+autosuggest&bf=pow(total_number_of_ratings_i%2C2.1)&sort=total_number_of_ratings_i+desc&siteName=rmp&rows=20&start=0&fl=pk_id+teacherfirstname_t+teacherlastname_t+total_number_of_ratings_i+averageratingscore_rf+schoolid_s&fq=&q=";
+    var myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
     var newCell;
     var columnValue = 0;
     var found = false;
@@ -55,7 +55,9 @@ function GetProfessorRating(myurl1, newCell, splitName, firstName, middleName, r
     xhr.open("GET", myurl1, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
+            console.log(xhr.responseText);
             var resp = JSON.parse(xhr.responseText);
+            
             var numFound = resp.response.numFound;
             //Add professor data if found
             if (numFound > 0) {
