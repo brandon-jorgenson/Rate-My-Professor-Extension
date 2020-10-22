@@ -1,24 +1,26 @@
+const nicknames = getNicknames();
+
 //Searches for the table of professor options on the BYU registration page
     var myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
     var newCell;
-
-    document.arrive('a[href*="mailto:"]', function(){
+    document.arrive('[href*="mailto:"]', function(){
         const fullName = this.textContent;
         const splitName = fullName.split(' ');
         const firstName = splitName[0].toLowerCase().trim();
         const lastName = splitName.slice(-1)[0].toLowerCase().trim();
         let middleName;
         if (splitName.length > 2) {
-            middleName = splitName[2];
+            middleName = splitName[0];
             middleName = middleName.toLowerCase().trim();
         }
         myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
         var runAgain = true;
         //Query Rate My Professor with the professor's name
-        GetProfessorRating(myurl1, this, lastName, firstName, middleName, runAgain);
+        GetProfessorRating(myurl1, this, lastName, firstName, middleName, runAgain, null);
 });
 
-function GetProfessorRating(myurl1, newCell, lastName, firstName, middleName, runAgain) {
+let index;
+function GetProfessorRating(myurl1, newCell, lastName, firstName, middleName, runAgain, originalFirstName) {
 
     chrome.runtime.sendMessage({ url: myurl1, type: "profRating" }, function (response) {
         var resp = response.JSONresponse;
@@ -31,25 +33,40 @@ function GetProfessorRating(myurl1, newCell, lastName, firstName, middleName, ru
             var profRating = resp.response.docs[0].averageratingscore_rf;
             if (profRating != undefined) {
                 var profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
+                newCell.textContent = newCell.textContent.replace("(N/A)", "");
                 newCell.setAttribute('href', profURL);
                 newCell.setAttribute('target', '_blank');
                 var allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-                AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName);
+                AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName, null);
             } else {
             }
         } else {
-            newCell.textContent += " (N/A)";
-            newCell.setAttribute('href', 
-            `https://www.ratemyprofessors.com/search.jsp?query=${firstName}+${middleName ? middleName : ''}+${lastName}`);
-            newCell.setAttribute('target', '_blank');
-        }
-        //Try again with professor's middle name if it didn't work the first time
-        if (newCell.innerHTML == "N/A" && splitName.length > 2 && runAgain) {
-            firstName = middleName;
-            myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-            runAgain = false;
-            GetProfessorRating(myurl1, newCell, splitName, firstName, middleName, runAgain);
-        }
+            //Try again with professor's middle name if it didn't work the first time
+            if (middleName && runAgain) {
+                firstName = middleName;
+                myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
+                GetProfessorRating(myurl1, newCell, lastName, firstName, middleName, false, null);
+            }
+
+            //Try again with nicknames for the professor's first name
+            else if (runAgain && nicknames[firstName]) {
+                myurl1 = myurl + nicknames[firstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
+                if(!originalFirstName){
+                    originalFirstName = firstName;
+                    index = 1;
+                }
+                GetProfessorRating(myurl1, newCell, lastName, nicknames[originalFirstName][index], middleName, index < nicknames[originalFirstName].length, originalFirstName);
+                index++;
+
+            }
+
+            // else {
+            //     newCell.textContent += " (N/A)";
+            //     newCell.setAttribute('href', 
+            //     `https://www.ratemyprofessors.com/search.jsp?query=${firstName}+${middleName ? middleName : ''}+${lastName}`);
+            //     newCell.setAttribute('target', '_blank');
+            // }
+        }        
     });
 }
 
@@ -117,4 +134,24 @@ function AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName) {
             }
         });
     });
+}
+
+// Check if company is already in localstorage
+var checkDatabase = function(name) {
+    if(localStorage[name]) {
+		return true;
+    }
+    return false;
+}
+
+// Save ratings into local storage, and keep track of how old it is
+var save = function(name, info) {
+	localStorage[name] = info;
+	var date = new Date();
+	localStorage["gd-retrieval-date"] = date.toDateString();
+}
+
+// Load rating
+var load = function(name) {
+    return localStorage[name];
 }
