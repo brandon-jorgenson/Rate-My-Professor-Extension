@@ -1,3 +1,4 @@
+var className = "";
 //Searches for the table of professor options on the BYU registration page
     var myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
     var newCell;
