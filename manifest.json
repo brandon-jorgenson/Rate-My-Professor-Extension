@@ -5,8 +5,8 @@
 	"permissions": ["storage", "https://search-production.ratemyprofessors.com/*"],
 	"content_scripts": [ {
 		"css": [ "tooltipster/dist/css/tooltipster.main.min.css", "tooltip.css" ],
-		"js": [ "jquery-3.3.1.min.js","tooltipster/dist/js/tooltipster.bundle.min.js" ,"background.js", "contentscript.js" ],
-		"matches": [ "http://y.byu.edu/ry/ae/prod/registration/cgi/regOfferings.cgi*", "https://y.byu.edu/ry/ae/prod/registration/cgi/regOfferings.cgi"]
+		"js": [ "jquery-3.3.1.min.js","arrive.min.js", "tooltipster/dist/js/tooltipster.bundle.min.js" ,"background.js", "contentscript.js" ],
+		"matches": [ "https://tigercenter.rit.edu/tigerCenterApp/api/class-search*" ]
 	  }],
 	"background": {
 		"scripts": ["background.js"],
