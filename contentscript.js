@@ -1,4 +1,3 @@
-var className = "";
 //Searches for the table of professor options on the BYU registration page
     var myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
     var newCell;
@@ -61,8 +60,7 @@ function AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName) {
         var easyRating = 0;
         var wouldTakeAgain = 0;
         var wouldTakeAgainNACount = 0;
-        var foundFirstReview = false;
-        var firstReview = "";
+        let mostHelpfulReview = "";
         for (var i = 0; i < resp.ratings.length; i++) {
             easyRating += resp.ratings[i].rEasy;
             if (resp.ratings[i].rWouldTakeAgain === "Yes") {
@@ -70,13 +68,11 @@ function AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName) {
             } else if (resp.ratings[i].rWouldTakeAgain === "N/A") {
                 wouldTakeAgainNACount++;
             }
-            if (resp.ratings[i].rClass === className && !foundFirstReview) {
-                firstReview = resp.ratings[i].rComments;
-                foundFirstReview = true;
-            }
         }
-        if (!foundFirstReview) {
-            firstReview = "N/A";
+        if(resp.ratings.length > 1) {
+            resp.ratings.sort(function(a,b) { return new Date(b.rDate) - new Date(a.rDate) });
+            resp.ratings.sort(function(a,b) { return (b.helpCount-b.notHelpCount) - (a.helpCount-a.notHelpCount) });
+            mostHelpfulReview = resp.ratings[0];
         }
         easyRating /= resp.ratings.length;
         if (resp.ratings.length >= 8 && wouldTakeAgainNACount < (resp.ratings.length / 2)) {
@@ -94,9 +90,9 @@ function AddTooltip(newCell, allprofRatingsURL, realFirstName, realLastName) {
         var wouldTakeAgainText = document.createElement("p");
         wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
         var classText = document.createElement("p");
-        classText.textContent = "Most recent review for " + className + ":";
+        classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
         var commentText = document.createElement("p");
-        commentText.textContent = firstReview;
+        commentText.textContent = mostHelpfulReview.rComments;
         commentText.classList.add('paragraph');
         div.appendChild(title);
         div.appendChild(professorText);
