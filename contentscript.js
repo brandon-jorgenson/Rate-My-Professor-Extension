@@ -32,14 +32,15 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             const profRating = doc.averageratingscore_rf;
             const numRatings = doc.total_number_of_ratings_i;
             const easyRating = doc.averageeasyscore_rf;
+
+            const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
+            element.textContent += ` (${profRating ? profRating : 'N/A'})`;
+            element.setAttribute('href', profURL);
+            element.setAttribute('target', '_blank');
+
             if (profRating != undefined) {
-                const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
-                element.textContent += ` (${profRating})`;
-                element.setAttribute('href', profURL);
-                element.setAttribute('target', '_blank');
                 const allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
                 AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating);
-            } else {
             }
         } else {
             //Try again with professor's middle name if it didn't work the first time
@@ -56,7 +57,7 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             }
 
             else {
-                element.textContent += " (N/A)";
+                element.textContent += " (NF)";
                 element.setAttribute('href', 
                 `https://www.ratemyprofessors.com/search.jsp?query=${firstName}+${middleName ? middleName : ''}+${lastName}`);
                 element.setAttribute('target', '_blank');
