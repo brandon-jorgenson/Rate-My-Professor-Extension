@@ -60,7 +60,7 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             else {
                 element.textContent += " (NF)";
                 element.setAttribute('href', 
-                `https://www.ratemyprofessors.com/search.jsp?query=${firstName}+${middleName ? middleName : ''}+${lastName}`);
+                `https://www.ratemyprofessors.com/search.jsp?query=${firstName}+${middleName ? middleName + '+': ''}${lastName}`);
                 element.setAttribute('target', '_blank');
             }
         }        
