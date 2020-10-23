@@ -30,9 +30,9 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             const realFirstName = doc.teacherfirstname_t;
             const realLastName = doc.teacherlastname_t;
             const dept = doc.teacherdepartment_s;
-            const profRating = doc.averageratingscore_rf;
+            const profRating = doc.averageratingscore_rf.toFixed(1);
             const numRatings = doc.total_number_of_ratings_i;
-            const easyRating = doc.averageeasyscore_rf;
+            const easyRating = doc.averageeasyscore_rf.toFixed(1);
 
             const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
             element.textContent += ` (${profRating ? profRating : 'N/A'})`;
