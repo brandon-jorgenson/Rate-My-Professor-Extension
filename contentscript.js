@@ -72,7 +72,9 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
         //Build content for professor tooltip
         let wouldTakeAgain = 0;
         let wouldTakeAgainNACount = 0;
-        let mostHelpfulReview = "";
+        let mostHelpfulReview;
+        let helpCount;
+        let notHelpCount;
         for (let i = 0; i < resp.ratings.length; i++) {
             if (resp.ratings[i].rWouldTakeAgain === "Yes") {
                 wouldTakeAgain++;
@@ -82,8 +84,10 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
         }
         if(resp.ratings.length > 1) {
             resp.ratings.sort(function(a,b) { return new Date(b.rDate) - new Date(a.rDate) });
-            resp.ratings.sort(function(a,b) { return (b.helpCount-b.notHelpCount) - (a.helpCount-a.notHelpCount) });
+            resp.ratings.sort(function(a,b) { return (b.helpCount - b.notHelpCount) - (a.helpCount - a.notHelpCount) });
             mostHelpfulReview = resp.ratings[0];
+            helpCount = mostHelpfulReview.helpCount;
+            notHelpCount = mostHelpfulReview.notHelpCount;
         }
         if (resp.ratings.length >= 8 && wouldTakeAgainNACount < (resp.ratings.length / 2)) {
             wouldTakeAgain = ((wouldTakeAgain / (resp.ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
@@ -103,19 +107,27 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
         wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
         const easyRatingText = document.createElement("p");
         easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
-        const classText = document.createElement("p");
-        classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
-        const commentText = document.createElement("p");
-        commentText.textContent = mostHelpfulReview.rComments;
-        commentText.classList.add('paragraph');
         div.appendChild(title);
         div.appendChild(professorText);
         div.appendChild(avgRatingText);
         div.appendChild(numRatingsText);
         div.appendChild(easyRatingText);
         div.appendChild(wouldTakeAgainText);
-        div.appendChild(classText);
-        div.appendChild(commentText);
+        if (mostHelpfulReview) {
+            const classText = document.createElement("p");
+            classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
+            const dateText = document.createElement("p");
+            dateText.textContent = mostHelpfulReview.rDate;
+            const commentText = document.createElement("p");
+            commentText.textContent = mostHelpfulReview.rComments;
+            commentText.classList.add('paragraph');
+            const upvotesText = document.createElement("p");
+            upvotesText.textContent = `👍${helpCount}   👎${notHelpCount}`;
+            div.appendChild(classText);
+            div.appendChild(dateText);
+            div.appendChild(commentText);
+            div.appendChild(upvotesText);
+        }
         element.class = "tooltip";
         element.addEventListener("mouseenter", function () {
             //Only create tooltip once
