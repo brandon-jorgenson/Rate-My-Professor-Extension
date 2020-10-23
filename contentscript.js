@@ -54,13 +54,13 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             //Try again with nicknames for the professor's first name
             else if (runAgain && nicknames[originalFirstName]) {
                 myurl1 = myurl + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(myurl1, element, lastName, nicknames[originalFirstName][index], middleName, index < nicknames[originalFirstName].length, originalFirstName, index+1);
+                GetProfessorRating(myurl1, element, lastName, nicknames[originalFirstName][index], middleName, nicknames[originalFirstName][index+1], originalFirstName, index+1);
             }
 
             else {
                 element.textContent += " (NF)";
                 element.setAttribute('href', 
-                `https://www.ratemyprofessors.com/search.jsp?query=${firstName}+${middleName ? middleName + '+': ''}${lastName}`);
+                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName ? originalFirstName : firstName}+${middleName ? middleName + '+': ''}${lastName}`);
                 element.setAttribute('target', '_blank');
             }
         }        
