@@ -2,7 +2,7 @@ const nicknames = getNicknames();
 
 //Searches for the table of professor options on the BYU registration page
     const myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
-    document.arrive('[href*="mailto:"]', function(){
+    document.arrive('.col-xs-2 [href*="mailto:"]', function(){
         const fullName = this.textContent;
         const splitName = fullName.split(' ');
         const firstName = splitName[0].toLowerCase().trim();
@@ -122,7 +122,7 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
             commentText.textContent = mostHelpfulReview.rComments;
             commentText.classList.add('paragraph');
             const upvotesText = document.createElement("p");
-            upvotesText.textContent = `👍${helpCount}   👎${notHelpCount}`;
+            upvotesText.textContent = `👍${helpCount} 👎${notHelpCount}`;
             div.appendChild(classText);
             div.appendChild(dateText);
             div.appendChild(commentText);
