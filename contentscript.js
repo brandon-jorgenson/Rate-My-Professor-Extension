@@ -1,7 +1,7 @@
 const nicknames = getNicknames();
 
 //Searches for the table of professor options on the BYU registration page
-    var myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
+    const myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
     document.arrive('[href*="mailto:"]', function(){
         const fullName = this.textContent;
         const splitName = fullName.split(' ');
@@ -13,7 +13,7 @@ const nicknames = getNicknames();
             middleName = middleName.toLowerCase().trim();
         }
         myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-        var runAgain = true;
+        const runAgain = true;
         //Query Rate My Professor with the professor's name
         GetProfessorRating(myurl1, this, lastName, firstName, middleName, runAgain, firstName, 0);
 });
@@ -21,21 +21,24 @@ const nicknames = getNicknames();
 function GetProfessorRating(myurl1, element, lastName, firstName, middleName, runAgain, originalFirstName, index) {
 
     chrome.runtime.sendMessage({ url: myurl1, type: "profRating" }, function (response) {
-        var resp = response.JSONresponse;
-        var numFound = resp.response.numFound;
+        const resp = response.JSONresponse;
+        const numFound = resp.response.numFound;
+        const doc = resp.response.docs[0];
         //Add professor data if found
         if (numFound > 0) {
-            var profID = resp.response.docs[0].pk_id;
-            var realFirstName = resp.response.docs[0].teacherfirstname_t;
-            var realLastName = resp.response.docs[0].teacherlastname_t;
-            var profRating = resp.response.docs[0].averageratingscore_rf;
+            const profID = doc.pk_id;
+            const realFirstName = doc.teacherfirstname_t;
+            const realLastName = doc.teacherlastname_t;
+            const profRating = doc.averageratingscore_rf;
+            const numRatings = doc.total_number_of_ratings_i;
+            const easyRating = doc.averageeasyscore_rf;
             if (profRating != undefined) {
-                var profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
+                const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
                 element.textContent += ` (${profRating})`;
                 element.setAttribute('href', profURL);
                 element.setAttribute('target', '_blank');
-                var allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-                AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, null);
+                const allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
+                AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating);
             } else {
             }
         } else {
@@ -62,16 +65,14 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
     });
 }
 
-function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName) {
+function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating) {
     chrome.runtime.sendMessage({ url: allprofRatingsURL, type: "tooltip" }, function (response) {
-        var resp = response.JSONresponse;
+        const resp = response.JSONresponse;
         //Build content for professor tooltip
-        var easyRating = 0;
-        var wouldTakeAgain = 0;
-        var wouldTakeAgainNACount = 0;
+        let wouldTakeAgain = 0;
+        let wouldTakeAgainNACount = 0;
         let mostHelpfulReview = "";
-        for (var i = 0; i < resp.ratings.length; i++) {
-            easyRating += resp.ratings[i].rEasy;
+        for (let i = 0; i < resp.ratings.length; i++) {
             if (resp.ratings[i].rWouldTakeAgain === "Yes") {
                 wouldTakeAgain++;
             } else if (resp.ratings[i].rWouldTakeAgain === "N/A") {
@@ -83,28 +84,33 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName) {
             resp.ratings.sort(function(a,b) { return (b.helpCount-b.notHelpCount) - (a.helpCount-a.notHelpCount) });
             mostHelpfulReview = resp.ratings[0];
         }
-        easyRating /= resp.ratings.length;
         if (resp.ratings.length >= 8 && wouldTakeAgainNACount < (resp.ratings.length / 2)) {
             wouldTakeAgain = ((wouldTakeAgain / (resp.ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
         } else {
             wouldTakeAgain = "N/A";
         }
-        var div = document.createElement("div");
-        var title = document.createElement("h3");
+        const div = document.createElement("div");
+        const title = document.createElement("h3");
         title.textContent = "Rate My Professor Details";
-        var professorText = document.createElement("p");
+        const professorText = document.createElement("p");
         professorText.textContent = "Professor Name: " + realFirstName + " " + realLastName;
-        var easyRatingText = document.createElement("p");
-        easyRatingText.textContent = "Level of Difficulty" + ": " + easyRating.toFixed(1).toString() + "/5.0";
-        var wouldTakeAgainText = document.createElement("p");
+        const avgRatingText = document.createElement("p");
+        avgRatingText.textContent = `Overall rating: ${profRating}/5`
+        const numRatingsText = document.createElement("p");
+        numRatingsText.textContent = `Number of Ratings: ${numRatings}`
+        const wouldTakeAgainText = document.createElement("p");
         wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
-        var classText = document.createElement("p");
+        const easyRatingText = document.createElement("p");
+        easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
+        const classText = document.createElement("p");
         classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
-        var commentText = document.createElement("p");
+        const commentText = document.createElement("p");
         commentText.textContent = mostHelpfulReview.rComments;
         commentText.classList.add('paragraph');
         div.appendChild(title);
         div.appendChild(professorText);
+        div.appendChild(avgRatingText);
+        div.appendChild(numRatingsText);
         div.appendChild(easyRatingText);
         div.appendChild(wouldTakeAgainText);
         div.appendChild(classText);
@@ -126,24 +132,4 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName) {
             }
         });
     });
-}
-
-// Check if company is already in localstorage
-var checkDatabase = function(name) {
-    if(localStorage[name]) {
-		return true;
-    }
-    return false;
-}
-
-// Save ratings into local storage, and keep track of how old it is
-var save = function(name, info) {
-	localStorage[name] = info;
-	var date = new Date();
-	localStorage["gd-retrieval-date"] = date.toDateString();
-}
-
-// Load rating
-var load = function(name) {
-    return localStorage[name];
 }
