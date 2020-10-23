@@ -29,6 +29,7 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             const profID = doc.pk_id;
             const realFirstName = doc.teacherfirstname_t;
             const realLastName = doc.teacherlastname_t;
+            const dept = doc.teacherdepartment_s;
             const profRating = doc.averageratingscore_rf;
             const numRatings = doc.total_number_of_ratings_i;
             const easyRating = doc.averageeasyscore_rf;
@@ -38,10 +39,10 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
             element.setAttribute('href', profURL);
             element.setAttribute('target', '_blank');
 
-            if (profRating != undefined) {
+            // if (profRating != undefined) {
                 const allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-                AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating);
-            }
+                AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept);
+            // }
         } else {
             //Try again with professor's middle name if it didn't work the first time
             if (middleName && runAgain) {
@@ -66,7 +67,7 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
     });
 }
 
-function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating) {
+function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept) {
     chrome.runtime.sendMessage({ url: allprofRatingsURL, type: "tooltip" }, function (response) {
         const resp = response.JSONresponse;
         //Build content for professor tooltip
@@ -75,44 +76,51 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
         let mostHelpfulReview;
         let helpCount;
         let notHelpCount;
-        for (let i = 0; i < resp.ratings.length; i++) {
-            if (resp.ratings[i].rWouldTakeAgain === "Yes") {
-                wouldTakeAgain++;
-            } else if (resp.ratings[i].rWouldTakeAgain === "N/A") {
-                wouldTakeAgainNACount++;
-            }
-        }
-        if(resp.ratings.length > 1) {
-            resp.ratings.sort(function(a,b) { return new Date(b.rDate) - new Date(a.rDate) });
-            resp.ratings.sort(function(a,b) { return (b.helpCount - b.notHelpCount) - (a.helpCount - a.notHelpCount) });
-            mostHelpfulReview = resp.ratings[0];
-            helpCount = mostHelpfulReview.helpCount;
-            notHelpCount = mostHelpfulReview.notHelpCount;
-        }
-        if (resp.ratings.length >= 8 && wouldTakeAgainNACount < (resp.ratings.length / 2)) {
-            wouldTakeAgain = ((wouldTakeAgain / (resp.ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
-        } else {
-            wouldTakeAgain = "N/A";
-        }
+        let wouldTakeAgainText;
+        let easyRatingText;
+
         const div = document.createElement("div");
         const title = document.createElement("h3");
         title.textContent = "Rate My Professor Details";
         const professorText = document.createElement("p");
-        professorText.textContent = "Professor Name: " + realFirstName + " " + realLastName;
         const avgRatingText = document.createElement("p");
-        avgRatingText.textContent = `Overall rating: ${profRating}/5`
+        avgRatingText.textContent = `Overall rating: ${profRating ? profRating : 'N/A'}/5`
         const numRatingsText = document.createElement("p");
         numRatingsText.textContent = `Number of Ratings: ${numRatings}`
-        const wouldTakeAgainText = document.createElement("p");
-        wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
-        const easyRatingText = document.createElement("p");
-        easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
+        professorText.textContent = `${realFirstName} ${realLastName}, Professor in the ${dept} department`;
         div.appendChild(title);
         div.appendChild(professorText);
         div.appendChild(avgRatingText);
         div.appendChild(numRatingsText);
-        div.appendChild(easyRatingText);
-        div.appendChild(wouldTakeAgainText);
+
+        if (resp.ratings.length > 0) {
+            
+            for (let i = 0; i < resp.ratings.length; i++) {
+                if (resp.ratings[i].rWouldTakeAgain === "Yes") {
+                    wouldTakeAgain++;
+                } else if (resp.ratings[i].rWouldTakeAgain === "N/A") {
+                    wouldTakeAgainNACount++;
+                }
+            }
+            if(resp.ratings.length > 1) {
+                resp.ratings.sort(function(a,b) { return new Date(b.rDate) - new Date(a.rDate) });
+                resp.ratings.sort(function(a,b) { return (b.helpCount - b.notHelpCount) - (a.helpCount - a.notHelpCount) });
+                mostHelpfulReview = resp.ratings[0];
+                helpCount = mostHelpfulReview.helpCount;
+                notHelpCount = mostHelpfulReview.notHelpCount;
+            }
+            if (resp.ratings.length >= 8 && wouldTakeAgainNACount < (resp.ratings.length / 2)) {
+                wouldTakeAgain = ((wouldTakeAgain / (resp.ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
+            } else {
+                wouldTakeAgain = "N/A";
+            }
+            wouldTakeAgainText = document.createElement("p");
+            wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
+            easyRatingText = document.createElement("p");
+            easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
+            div.appendChild(easyRatingText);
+            div.appendChild(wouldTakeAgainText);
+        }
         if (mostHelpfulReview) {
             const classText = document.createElement("p");
             classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
