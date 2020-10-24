@@ -1,6 +1,6 @@
 const nicknames = getNicknames();
 
-//Searches for the table of professor options on the BYU registration page
+// Searches for the table of professor options on the BYU registration page
     const myurl = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
     document.arrive('.col-xs-2 [href*="mailto:"]', function(){
         const fullName = this.textContent;
@@ -14,7 +14,7 @@ const nicknames = getNicknames();
         }
         myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
         const runAgain = true;
-        //Query Rate My Professor with the professor's name
+        // Query Rate My Professor with the professor's name
         GetProfessorRating(myurl1, this, lastName, firstName, middleName, runAgain, firstName, 0);
 });
 
@@ -24,43 +24,40 @@ function GetProfessorRating(myurl1, element, lastName, firstName, middleName, ru
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
         const doc = resp.response.docs[0];
-        //Add professor data if found
-        if (numFound > 0) {
+        // Add professor data if found
+        if (numFound > 0 && doc) {
             const profID = doc.pk_id;
             const realFirstName = doc.teacherfirstname_t;
             const realLastName = doc.teacherlastname_t;
             const dept = doc.teacherdepartment_s;
-            const profRating = doc.averageratingscore_rf.toFixed(1);
+            const profRating = doc.averageratingscore_rf && doc.averageratingscore_rf.toFixed(1);
             const numRatings = doc.total_number_of_ratings_i;
-            const easyRating = doc.averageeasyscore_rf.toFixed(1);
+            const easyRating = doc.averageeasyscore_rf && doc.averageeasyscore_rf.toFixed(1);
 
             const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
             element.textContent += ` (${profRating ? profRating : 'N/A'})`;
             element.setAttribute('href', profURL);
             element.setAttribute('target', '_blank');
 
-            // if (profRating != undefined) {
-                let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-                AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept);
-            // }
+            let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
+            AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept);
         } else {
-            //Try again with professor's middle name if it didn't work the first time
+            // Try again with professor's middle name if it didn't work the first time
             if (middleName && runAgain) {
                 firstName = middleName;
                 myurl1 = myurl + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(myurl1, element, lastName, firstName, middleName, false, null);
             }
-
-            //Try again with nicknames for the professor's first name
+            // Try again with nicknames for the professor's first name
             else if (runAgain && nicknames[originalFirstName]) {
                 myurl1 = myurl + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(myurl1, element, lastName, nicknames[originalFirstName][index], middleName, nicknames[originalFirstName][index+1], originalFirstName, index+1);
             }
-
+            // Set link to search results if not found
             else {
                 element.textContent += " (NF)";
                 element.setAttribute('href', 
-                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName ? originalFirstName : firstName}+${middleName ? middleName + '+': ''}${lastName}`);
+                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName}+${middleName ? middleName + '+': ''}${lastName}`);
                 element.setAttribute('target', '_blank');
             }
         }        
@@ -146,7 +143,7 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                 }
                 element.class = "tooltip";
                 element.addEventListener("mouseenter", function () {
-                    //Only create tooltip once
+                    // Only create tooltip once
                     if (!$(element).hasClass('tooltipstered')) {
                         $(this)
                             .tooltipster({
