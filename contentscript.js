@@ -1,25 +1,24 @@
 const nicknames = getNicknames();
 
-// Searches for the table of professor options on the BYU registration page
-    const urlBase = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
-    document.arrive('.col-xs-2 [href*="mailto:"]', function(){
-        const fullName = this.textContent;
-        const splitName = fullName.split(' ');
-        const firstName = splitName[0].toLowerCase().trim();
-        const lastName = splitName.slice(-1)[0].toLowerCase().trim();
-        let middleName;
-        if (splitName.length > 2) {
-            middleName = splitName[0];
-            middleName = middleName.toLowerCase().trim();
-        }
-        url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-        const runAgain = true;
-        // Query Rate My Professor with the professor's name
-        GetProfessorRating(url, this, lastName, firstName, middleName, runAgain, firstName, 0);
+// Add professor ratings
+const urlBase = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
+document.arrive('.col-xs-2 [href*="mailto:"]', function(){
+    const fullName = this.textContent;
+    const splitName = fullName.split(' ');
+    const firstName = splitName[0].toLowerCase().trim();
+    const lastName = splitName.slice(-1)[0].toLowerCase().trim();
+    let middleName;
+    if (splitName.length > 2) {
+        middleName = splitName[0];
+        middleName = middleName.toLowerCase().trim();
+    }
+    url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
+    const runAgain = true;
+    // Query Rate My Professor with the professor's name
+    GetProfessorRating(url, this, lastName, firstName, middleName, runAgain, firstName, 0);
 });
 
 function GetProfessorRating(url, element, lastName, firstName, middleName, runAgain, originalFirstName, index) {
-
     chrome.runtime.sendMessage({ url: url, type: "profRating" }, function (response) {
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
