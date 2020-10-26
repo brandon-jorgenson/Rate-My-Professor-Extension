@@ -3,7 +3,7 @@ const nicknames = getNicknames();
 // Add professor ratings
 const urlBase = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
 document.arrive('.col-xs-2 [href*="mailto:"]', function(){
-    const fullName = this.textContent;
+    const fullName = replaceCustomNicknames(this.textContent);
     const splitName = fullName.split(' ');
     const firstName = splitName[0].toLowerCase().trim();
     const lastName = splitName.slice(-1)[0].toLowerCase().trim();
@@ -101,7 +101,7 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                 div.appendChild(numRatingsText);
 
                 if (ratings.length > 0) {
-                    let tagFreqMap = new Map();        
+                    let tagFreqMap = new Map();
                     for (let i = 0; i < ratings.length; i++) {
                         let rating = ratings[i];
                         if (rating.rWouldTakeAgain === "Yes") {
