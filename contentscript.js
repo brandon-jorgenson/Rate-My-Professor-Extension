@@ -83,6 +83,8 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                 let notHelpCount;
                 let wouldTakeAgainText;
                 let easyRatingText;
+                let tagsLabel;
+                let tagsText;
 
                 const div = document.createElement("div");
                 const title = document.createElement("h3");
@@ -99,31 +101,55 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                 div.appendChild(numRatingsText);
 
                 if (ratings.length > 0) {
+                    let tagFreqMap = new Map();        
                     for (let i = 0; i < ratings.length; i++) {
-                        if (ratings[i].rWouldTakeAgain === "Yes") {
+                        let rating = ratings[i];
+                        if (rating.rWouldTakeAgain === "Yes") {
                             wouldTakeAgain++;
-                        } else if (ratings[i].rWouldTakeAgain === "N/A") {
+                        } else if (rating.rWouldTakeAgain === "N/A") {
                             wouldTakeAgainNACount++;
                         }
+                        let teacherRatingTags = rating.teacherRatingTags;
+                        for (let j = 0; j < teacherRatingTags.length; j++) {
+                            let tag = teacherRatingTags[j];
+                            if (tagFreqMap.get(tag)){
+                                tagFreqMap.get(tag).count++;
+                            }
+                            else{
+                                tagFreqMap.set(tag, { count: 0 });
+                            }
+                        }
                     }
-                    if(ratings.length > 1) {
-                        ratings.sort(function(a,b) { return new Date(b.rDate) - new Date(a.rDate) });
-                        ratings.sort(function(a,b) { return (b.helpCount - b.notHelpCount) - (a.helpCount - a.notHelpCount) });
-                        mostHelpfulReview = ratings[0];
-                        helpCount = mostHelpfulReview.helpCount;
-                        notHelpCount = mostHelpfulReview.notHelpCount;
-                    }
+
+                    ratings.sort(function(a,b) { return new Date(b.rDate) - new Date(a.rDate) });
+                    ratings.sort(function(a,b) { return (b.helpCount - b.notHelpCount) - (a.helpCount - a.notHelpCount) });
+                    mostHelpfulReview = ratings[0];
+                    helpCount = mostHelpfulReview.helpCount;
+                    notHelpCount = mostHelpfulReview.notHelpCount;
+
                     if (ratings.length >= 8 && wouldTakeAgainNACount < (ratings.length / 2)) {
                         wouldTakeAgain = ((wouldTakeAgain / (ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
                     } else {
                         wouldTakeAgain = "N/A";
                     }
+
+                    const topTags = ([...tagFreqMap.entries()].sort((a, b) => a.count - b.count)).splice(0, 5);
+                    
                     wouldTakeAgainText = document.createElement("p");
                     wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
                     easyRatingText = document.createElement("p");
                     easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
+                    tagsLabel = document.createElement("p");
+                    tagsLabel.textContent = "Top Tags:";
+                    tagsText = document.createElement("p");
+                    for (let i = 0; i < topTags.length; i++) {
+                        let tag = topTags[i][0];
+                        tagsText.textContent += `${tag}${i !== topTags.length - 1 ? ", " : ""}`;
+                    }
                     div.appendChild(easyRatingText);
                     div.appendChild(wouldTakeAgainText);
+                    div.appendChild(tagsLabel);
+                    div.appendChild(tagsText);
                 }
                 if (mostHelpfulReview) {
                     const classText = document.createElement("p");
