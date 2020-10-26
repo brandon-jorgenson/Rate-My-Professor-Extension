@@ -149,14 +149,27 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                         topTagsText.textContent += `${tag}${i !== topTags.length - 1 ? ", " : ""}`;
                     }
                     div.appendChild(topTagsText);
+                    div.appendChild(document.createElement("br"));
                 }
                 if (mostHelpfulReview) {
                     const classText = document.createElement("p");
-                    classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
+                    classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass + 
+                    (mostHelpfulReview.onlineClass === "online" ? " (Online)" : "");  // Mark if class was online
                     div.appendChild(classText);
                     const dateText = document.createElement("p");
                     dateText.textContent = mostHelpfulReview.rDate;
                     div.appendChild(dateText);
+                    const profRating = document.createElement("p");
+                    profRating.textContent = "Overall Quality: " + mostHelpfulReview.rOverallString;
+                    div.appendChild(profRating);
+                    const thisEasyRating = document.createElement("p");
+                    thisEasyRating.textContent = "Level of Difficulty: " + mostHelpfulReview.rEasyString;
+                    div.appendChild(thisEasyRating);
+                    if (mostHelpfulReview.rWouldTakeAgain !== "N/A") {
+                        const thisWouldTakeAgain = document.createElement("p");
+                        thisWouldTakeAgain.textContent = "Would take again: " + mostHelpfulReview.rWouldTakeAgain;
+                        div.appendChild(thisWouldTakeAgain);
+                    }
                     const commentText = document.createElement("p");
                     commentText.textContent = mostHelpfulReview.rComments;
                     commentText.classList.add('paragraph');
