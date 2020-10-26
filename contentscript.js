@@ -83,21 +83,21 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                 let notHelpCount;
                 let wouldTakeAgainText;
                 let easyRatingText;
-                let tagsLabel;
-                let tagsText;
+                let topTagsLabel;
+                let topTagsText;
 
                 const div = document.createElement("div");
                 const title = document.createElement("h3");
                 title.textContent = "Rate My Professor Details";
+                div.appendChild(title);
                 const professorText = document.createElement("p");
+                professorText.textContent = `${realFirstName} ${realLastName}, Professor in the ${dept} department`;
+                div.appendChild(professorText);
                 const avgRatingText = document.createElement("p");
-                avgRatingText.textContent = `Overall rating: ${profRating ? profRating : 'N/A'}/5`
+                avgRatingText.textContent = `Overall Quality: ${profRating ? profRating : 'N/A'}/5`
+                div.appendChild(avgRatingText);
                 const numRatingsText = document.createElement("p");
                 numRatingsText.textContent = `Number of Ratings: ${numRatings}`
-                professorText.textContent = `${realFirstName} ${realLastName}, Professor in the ${dept} department`;
-                div.appendChild(title);
-                div.appendChild(professorText);
-                div.appendChild(avgRatingText);
                 div.appendChild(numRatingsText);
 
                 if (ratings.length > 0) {
@@ -109,6 +109,7 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                         } else if (rating.rWouldTakeAgain === "N/A") {
                             wouldTakeAgainNACount++;
                         }
+
                         let teacherRatingTags = rating.teacherRatingTags;
                         for (let j = 0; j < teacherRatingTags.length; j++) {
                             let tag = teacherRatingTags[j];
@@ -127,43 +128,51 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                     helpCount = mostHelpfulReview.helpCount;
                     notHelpCount = mostHelpfulReview.notHelpCount;
 
+                    const topTags = ([...tagFreqMap.entries()].sort((a, b) => a.count - b.count)).splice(0, 5);
+                    easyRatingText = document.createElement("p");
+                    easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
+                    div.appendChild(easyRatingText);
+                    wouldTakeAgainText = document.createElement("p");
                     if (ratings.length >= 8 && wouldTakeAgainNACount < (ratings.length / 2)) {
                         wouldTakeAgain = ((wouldTakeAgain / (ratings.length - wouldTakeAgainNACount)) * 100).toFixed(0).toString() + "%";
                     } else {
                         wouldTakeAgain = "N/A";
                     }
-
-                    const topTags = ([...tagFreqMap.entries()].sort((a, b) => a.count - b.count)).splice(0, 5);
-                    
-                    wouldTakeAgainText = document.createElement("p");
                     wouldTakeAgainText.textContent = "Would take again: " + wouldTakeAgain;
-                    easyRatingText = document.createElement("p");
-                    easyRatingText.textContent = `Level of Difficulty: ${easyRating}`;
-                    tagsLabel = document.createElement("p");
-                    tagsLabel.textContent = "Top Tags:";
-                    tagsText = document.createElement("p");
+                    div.appendChild(wouldTakeAgainText);
+                    topTagsLabel = document.createElement("p");
+                    topTagsLabel.textContent = "Top Tags:";
+                    div.appendChild(topTagsLabel);
+                    topTagsText = document.createElement("p");
                     for (let i = 0; i < topTags.length; i++) {
                         let tag = topTags[i][0];
-                        tagsText.textContent += `${tag}${i !== topTags.length - 1 ? ", " : ""}`;
+                        topTagsText.textContent += `${tag}${i !== topTags.length - 1 ? ", " : ""}`;
                     }
-                    div.appendChild(easyRatingText);
-                    div.appendChild(wouldTakeAgainText);
-                    div.appendChild(tagsLabel);
-                    div.appendChild(tagsText);
+                    div.appendChild(topTagsText);
                 }
                 if (mostHelpfulReview) {
                     const classText = document.createElement("p");
                     classText.textContent = "Most Helpful Rating: " + mostHelpfulReview.rClass;
+                    div.appendChild(classText);
                     const dateText = document.createElement("p");
                     dateText.textContent = mostHelpfulReview.rDate;
+                    div.appendChild(dateText);
                     const commentText = document.createElement("p");
                     commentText.textContent = mostHelpfulReview.rComments;
                     commentText.classList.add('paragraph');
+                    div.appendChild(commentText);
+                    const tagsText = document.createElement("p");
+                    tagsText.textContent = "Tags: "
+                    const tags = mostHelpfulReview.teacherRatingTags;
+                    if (tags.length > 0) {
+                        for (let i = 0; i < tags.length; i++) {
+                            let tag = tags[i];
+                            tagsText.textContent += `${tag}${i !== tags.length - 1 ? ", " : ""}`;
+                        }
+                        div.appendChild(tagsText);
+                    }
                     const upvotesText = document.createElement("p");
                     upvotesText.textContent = `👍${helpCount} 👎${notHelpCount}`;
-                    div.appendChild(classText);
-                    div.appendChild(dateText);
-                    div.appendChild(commentText);
                     div.appendChild(upvotesText);
                 }
                 element.class = "tooltip";
