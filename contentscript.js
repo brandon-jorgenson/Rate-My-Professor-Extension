@@ -19,7 +19,7 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
 });
 
 function GetProfessorRating(url, element, lastName, firstName, middleName, runAgain, originalFirstName, index) {
-    chrome.runtime.sendMessage({ url: url, type: "profRating" }, function (response) {
+    chrome.runtime.sendMessage({ url: url }, function (response) {
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
         const doc = resp.response.docs[0];
@@ -66,7 +66,7 @@ function GetProfessorRating(url, element, lastName, firstName, middleName, runAg
 function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept) {
     let ratings = [];
     function getRatings(url){
-        chrome.runtime.sendMessage({ url: url, type: "tooltip" }, function (response) { 
+        chrome.runtime.sendMessage({ url: url }, function (response) { 
             ratings = ratings.concat(response.JSONresponse.ratings);
             var remaining = response.JSONresponse.remaining;
             let pageNum = parseInt(new URLSearchParams(url).get('page'));
