@@ -8,8 +8,5 @@ Professors' names will now link to their Rate My Professors page (or the search 
 
 ![Screenshot](images/screenshot.png)
 
-Todo:
-- Make extension college-agnostic
-
 Maybe:
 - Add CSS to tooltip
