@@ -205,9 +205,10 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                             .tooltipster({
                                 animation: 'grow',
                                 theme: 'tooltipster-default',
-                                side: 'left',
+                                side: 'right',
                                 content: div,
                                 contentAsHTML: true,
+                                maxWidth: 400,
                                 delay: 100
                             })
                             .tooltipster('show');
