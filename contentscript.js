@@ -18,12 +18,13 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
     url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
     const runAgain = true;
     const originalFirstName = firstName;
+    const originalLastName = lastName;
     const index = 0;
     // Query Rate My Professor with the professor's name
-    GetProfessorRating(url, this, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain, originalFirstName, index);
+    GetProfessorRating(url, this, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
 });
 
-function GetProfessorRating(url, element, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain, originalFirstName, index) {
+function GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index) {
     chrome.runtime.sendMessage({ url: url }, function (response) {
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
@@ -45,31 +46,37 @@ function GetProfessorRating(url, element, fullName, lastName, firstName, middleN
             let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
             AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
         } else {
+            const middleNamesString = middleNames.join('+');
+
             // Try again with a middle name removed
             if (middleNames.length > 0) {
-                const middleNamesString = middleNames.join('+');
                 url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
                 middleNames.pop();
-                GetProfessorRating(url, element, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain, originalFirstName, index);
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
             }
+            else if (lastName.includes("-")) {
+                lastName = lastName.split('-')[0];
+                url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
+            }            
             // Try again with nicknames for the professor's first name
             else if (runAgain && nicknames[originalFirstName]) {
                 url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, fullName, lastName, nicknames[originalFirstName][index], middleNames, originalMiddleNames,
-                    nicknames[originalFirstName][index+1], originalFirstName, index+1);
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, nicknames[originalFirstName][index], originalFirstName, middleNames, originalMiddleNames,
+                    nicknames[originalFirstName][index+1], index+1);
             }
             // Try again with professor's middle name as their first name
             else if (originalMiddleNames.length > 0 && runAgain) {
                 firstName = originalMiddleNames[0];
                 url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain=false, originalFirstName, index);
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain=false, index);
             }
             // Set link to search results if not found
             else {
                 element.textContent += " (NF)";
                 const origMiddleNamesString = originalMiddleNames.join('+');
                 element.setAttribute('href', 
-                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName}+${originalMiddleNames.length > 0 ? origMiddleNamesString + '+': ''}${lastName}`);
+                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName}+${originalMiddleNames.length > 0 ? origMiddleNamesString + '+': ''}${originalLastName}`);
                 element.setAttribute('target', '_blank');
             }
         }        
