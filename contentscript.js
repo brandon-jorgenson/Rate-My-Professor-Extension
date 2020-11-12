@@ -7,20 +7,23 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
     const splitName = fullName.split(' ');
     const firstName = splitName[0].toLowerCase().trim();
     const lastName = splitName.slice(-1)[0].toLowerCase().trim();
-    let middleName;
+    let middleNames = [];
+    let originalMiddleNames = [];
     if (splitName.length > 2) {
-        middleName = splitName[0];
-        middleName = middleName.toLowerCase().trim();
+        // Shallow copy arrays
+        middleNames = JSON.parse(JSON.stringify(splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())));
+        originalMiddleNames = JSON.parse(JSON.stringify(splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())));
     }
-    url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
+    const middleNamesString = middleNames.join('+');
+    url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
     const runAgain = true;
     const originalFirstName = firstName;
     const index = 0;
     // Query Rate My Professor with the professor's name
-    GetProfessorRating(url, this, fullName, lastName, firstName, middleName, runAgain, originalFirstName, index);
+    GetProfessorRating(url, this, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain, originalFirstName, index);
 });
 
-function GetProfessorRating(url, element, fullName, lastName, firstName, middleName, runAgain, originalFirstName, index) {
+function GetProfessorRating(url, element, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain, originalFirstName, index) {
     chrome.runtime.sendMessage({ url: url }, function (response) {
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
@@ -42,22 +45,31 @@ function GetProfessorRating(url, element, fullName, lastName, firstName, middleN
             let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
             AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
         } else {
-            // Try again with professor's middle name if it didn't work the first time
-            if (middleName && runAgain) {
-                firstName = middleName;
-                url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, fullName, lastName, firstName, middleName, false, null);
+            // Try again with a middle name removed
+            if (middleNames.length > 0) {
+                const middleNamesString = middleNames.join('+');
+                url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
+                middleNames.pop();
+                GetProfessorRating(url, element, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain, originalFirstName, index);
             }
             // Try again with nicknames for the professor's first name
             else if (runAgain && nicknames[originalFirstName]) {
                 url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, fullName, lastName, nicknames[originalFirstName][index], middleName, nicknames[originalFirstName][index+1], originalFirstName, index+1);
+                GetProfessorRating(url, element, fullName, lastName, nicknames[originalFirstName][index], middleNames, originalMiddleNames,
+                    nicknames[originalFirstName][index+1], originalFirstName, index+1);
+            }
+            // Try again with professor's middle name as their first name
+            else if (originalMiddleNames.length > 0 && runAgain) {
+                firstName = originalMiddleNames[0];
+                url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
+                GetProfessorRating(url, element, fullName, lastName, firstName, middleNames, originalMiddleNames, runAgain=false, originalFirstName, index);
             }
             // Set link to search results if not found
             else {
                 element.textContent += " (NF)";
+                const origMiddleNamesString = originalMiddleNames.join('+');
                 element.setAttribute('href', 
-                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName}+${middleName ? middleName + '+': ''}${lastName}`);
+                `https://www.ratemyprofessors.com/search.jsp?query=${originalFirstName}+${originalMiddleNames.length > 0 ? origMiddleNamesString + '+': ''}${lastName}`);
                 element.setAttribute('target', '_blank');
             }
         }        
