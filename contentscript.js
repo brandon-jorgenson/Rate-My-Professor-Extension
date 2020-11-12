@@ -14,11 +14,13 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
     }
     url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
     const runAgain = true;
+    const originalFirstName = firstName;
+    const index = 0;
     // Query Rate My Professor with the professor's name
-    GetProfessorRating(url, this, lastName, firstName, middleName, runAgain, firstName, 0);
+    GetProfessorRating(url, this, fullName, lastName, firstName, middleName, runAgain, originalFirstName, index);
 });
 
-function GetProfessorRating(url, element, lastName, firstName, middleName, runAgain, originalFirstName, index) {
+function GetProfessorRating(url, element, fullName, lastName, firstName, middleName, runAgain, originalFirstName, index) {
     chrome.runtime.sendMessage({ url: url }, function (response) {
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
@@ -26,8 +28,7 @@ function GetProfessorRating(url, element, lastName, firstName, middleName, runAg
         // Add professor data if found
         if (numFound > 0 && doc) {
             const profID = doc.pk_id;
-            const realFirstName = doc.teacherfirstname_t;
-            const realLastName = doc.teacherlastname_t;
+            const realFullName = doc.teacherfullname_s;
             const dept = doc.teacherdepartment_s;
             const profRating = doc.averageratingscore_rf && doc.averageratingscore_rf.toFixed(1);
             const numRatings = doc.total_number_of_ratings_i;
@@ -39,18 +40,18 @@ function GetProfessorRating(url, element, lastName, firstName, middleName, runAg
             element.setAttribute('target', '_blank');
 
             let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-            AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept);
+            AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
         } else {
             // Try again with professor's middle name if it didn't work the first time
             if (middleName && runAgain) {
                 firstName = middleName;
                 url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, lastName, firstName, middleName, false, null);
+                GetProfessorRating(url, element, fullName, lastName, firstName, middleName, false, null);
             }
             // Try again with nicknames for the professor's first name
             else if (runAgain && nicknames[originalFirstName]) {
                 url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, lastName, nicknames[originalFirstName][index], middleName, nicknames[originalFirstName][index+1], originalFirstName, index+1);
+                GetProfessorRating(url, element, fullName, lastName, nicknames[originalFirstName][index], middleName, nicknames[originalFirstName][index+1], originalFirstName, index+1);
             }
             // Set link to search results if not found
             else {
@@ -63,7 +64,7 @@ function GetProfessorRating(url, element, lastName, firstName, middleName, runAg
     });
 }
 
-function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, profRating, numRatings, easyRating, dept) {
+function AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept) {
     let ratings = [];
     function getRatings(url){
         chrome.runtime.sendMessage({ url: url }, function (response) { 
@@ -90,7 +91,7 @@ function AddTooltip(element, allprofRatingsURL, realFirstName, realLastName, pro
                 title.textContent = "Rate My Professor Details";
                 div.appendChild(title);
                 const professorText = document.createElement("p");
-                professorText.textContent = `${realFirstName} ${realLastName}, Professor in ${dept}`;
+                professorText.textContent = `${realFullName}, Professor in ${dept}`;
                 div.appendChild(professorText);
                 const avgRatingText = document.createElement("p");
                 avgRatingText.textContent = `Overall Quality: ${profRating ? profRating : 'N/A'}/5`
