@@ -218,7 +218,6 @@ function AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRat
                                 side: 'right',
                                 content: div,
                                 contentAsHTML: true,
-                                interactive: true,
                                 maxWidth: 400,
                                 delay: 100
                             })
