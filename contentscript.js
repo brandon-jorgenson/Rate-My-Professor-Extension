@@ -13,8 +13,8 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
         middleNames = [...splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())];
         originalMiddleNames = [...middleNames];
     }
-    const middleNamesString = middleNames.join('+');
-    url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
+    const middleNamesString = '';
+    url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807"; // Try with no middle names at first
     const runAgain = true;
     const originalFirstName = firstName;
     const originalLastName = lastName;
@@ -24,11 +24,11 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
     const middleNameAsFirst = false;
     // Query Rate My Professor with the professor's name
     GetProfessorRating(url, this, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, 
-        index, removedMiddleNames, middleNameAsFirst);
+        index, removedMiddleNames, middleNameAsFirst, middleNamesString);
 });
 
 function GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-    runAgain, index, removedMiddleNames, middleNameAsFirst) {
+    runAgain, index, removedMiddleNames, middleNameAsFirst, middleNamesString) {
     chrome.runtime.sendMessage({ url: url }, function (response) {
         const resp = response.JSONresponse;
         const numFound = resp.response.numFound;
@@ -50,18 +50,17 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
             AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
         } else {
-            let middleNamesString = middleNames.join('+');
             // Try again with only the maiden name of a hyphenated last name
             if (lastName.includes("-")) {
                 lastName = lastName.split('-')[0];
-                url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
+                url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                     runAgain, index, removedMiddleNames, middleNameAsFirst);
             }
             // Try again with a middle name removed
-            else if (middleNames.length > 0) {
+            else if (middleNamesString !== '' && middleNames.length > 0) {
                 if (!removedMiddleNames) {
-                    url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
+                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
                     middleNames.pop();
                     if (middleNames.length === 0) {
                         removedMiddleNames = true;
@@ -73,7 +72,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 else {
                     // Try again with the middle names as the last name (Maiden name and Spanish surnames)
                     middleNamesString = middleNames.join('+');
-                    url = urlBase + firstName + "+" + middleNamesString + "+AND+schoolid_s%3A807";
+                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + "AND+schoolid_s%3A807";
                     middleNames.pop(); // Remove any name particles such as "de", "y", and "la"
                     GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                         runAgain, index, removedMiddleNames, middleNameAsFirst);    
@@ -86,12 +85,18 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                     middleNames, originalMiddleNames, nicknames[originalFirstName][index+1], index+1, removedMiddleNames, middleNameAsFirst);
             }            
             // Try again with the middle name as the first name
-            else if (originalMiddleNames.length > 0 && !middleNameAsFirst) {
+            else if (middleNamesString !== ''  && originalMiddleNames.length > 0 && !middleNameAsFirst) {
                 firstName = originalMiddleNames[0];
                 url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                     true, index, removedMiddleNames, true); // Try again with nicknames for this name
-            }            
+            }
+            // Try again with middle names
+            else if (middleNamesString === ''){
+                middleNamesString = middleNames.join('+');
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
+                    runAgain, index, removedMiddleNames, middleNameAsFirst);
+            }
             // Set link to search results if not found
             else {
                 element.textContent += " (NF)";
