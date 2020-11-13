@@ -28,7 +28,6 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
     let middleNames = [];
     let originalMiddleNames = [];
     if (splitName.length > 2) {
-        // Shallow copy arrays
         middleNames = JSON.parse(JSON.stringify(splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())));
         originalMiddleNames = JSON.parse(JSON.stringify(splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())));
     }
@@ -65,30 +64,37 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
         } else {
             const middleNamesString = middleNames.join('+');
-
+            // Try again with only the maiden name of a hyphenated last name
+            if (lastName.includes("-")) {
+                lastName = lastName.split('-')[0];
+                url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
+            }
             // Try again with a middle name removed
-            if (middleNames.length > 0) {
+            else if (middleNames.length > 0) {
                 url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
                 middleNames.pop();
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
             }
-            // Try again with only the maiden name of a hyphenated last name
-            else if (lastName.includes("-")) {
-                lastName = lastName.split('-')[0];
-                url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
-            }            
-            // Try again with nicknames for the professor's first name
+            // Try again with the middle names as the last name (Spanish surnames)
+            // Start off with all middle names to catch particles such as "de", "y", and "la"
+            else if (originalMiddleNames.length > 0 && runAgain) {
+                middleNames = [...originalMiddleNames];
+                url = urlBase + firstName + "+" + middleNamesString + "+AND+schoolid_s%3A807";
+                middleNames.pop();
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, middleNames.length > 0, index);
+            }
+            // Try again with the middle name as the first name
+            else if (originalMiddleNames.length > 0 && runAgain) {
+                firstName = originalMiddleNames[0];
+                url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, false, index);
+            }
+            // Try again with nicknames for the first name
             else if (runAgain && nicknames[originalFirstName]) {
                 url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, nicknames[originalFirstName][index], originalFirstName, middleNames, originalMiddleNames,
                     nicknames[originalFirstName][index+1], index+1);
-            }
-            // Try again with professor's middle name as their first name
-            else if (originalMiddleNames.length > 0 && runAgain) {
-                firstName = originalMiddleNames[0];
-                url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
-                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain=false, index);
             }
             // Set link to search results if not found
             else {
