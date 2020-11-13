@@ -42,20 +42,22 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                     runAgain, index, middleNamesPopLast, middleNamesPopFirst, middleNameAsFirst);
             }
-            const profID = doc.pk_id;
-            const realFullName = doc.teacherfullname_s;
-            const dept = doc.teacherdepartment_s;
-            const profRating = doc.averageratingscore_rf && doc.averageratingscore_rf.toFixed(1);
-            const numRatings = doc.total_number_of_ratings_i;
-            const easyRating = doc.averageeasyscore_rf && doc.averageeasyscore_rf.toFixed(1);
+            else {
+                const profID = doc.pk_id;
+                const realFullName = doc.teacherfullname_s;
+                const dept = doc.teacherdepartment_s;
+                const profRating = doc.averageratingscore_rf && doc.averageratingscore_rf.toFixed(1);
+                const numRatings = doc.total_number_of_ratings_i;
+                const easyRating = doc.averageeasyscore_rf && doc.averageeasyscore_rf.toFixed(1);
 
-            const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
-            element.textContent += ` (${profRating ? profRating : 'N/A'})`;
-            element.setAttribute('href', profURL);
-            element.setAttribute('target', '_blank');
+                const profURL = "http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID;
+                element.textContent += ` (${profRating ? profRating : 'N/A'})`;
+                element.setAttribute('href', profURL);
+                element.setAttribute('target', '_blank');
 
-            let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
-            AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
+                let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
+                AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
+            }
         } else {
             // Try again with only the maiden name of a hyphenated last name
             if (lastName.includes("-")) {
