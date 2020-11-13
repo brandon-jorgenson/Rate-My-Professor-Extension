@@ -72,6 +72,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 middleNames.pop();
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
             }
+            // Try again with only the maiden name of a hyphenated last name
             else if (lastName.includes("-")) {
                 lastName = lastName.split('-')[0];
                 url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
