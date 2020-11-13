@@ -28,8 +28,8 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
     let middleNames = [];
     let originalMiddleNames = [];
     if (splitName.length > 2) {
-        middleNames = JSON.parse(JSON.stringify(splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())));
-        originalMiddleNames = JSON.parse(JSON.stringify(splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())));
+        middleNames = [...splitName.slice(1, splitName.length-1).map(name => name.toLowerCase().trim())];
+        originalMiddleNames = [...middleNames];
     }
     const middleNamesString = middleNames.join('+');
     url = urlBase + firstName + "+" + middleNamesString + "+" + lastName + "+AND+schoolid_s%3A807";
@@ -63,7 +63,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             let allprofRatingsURL = "https://www.ratemyprofessors.com/paginate/professors/ratings?tid=" + profID + "&page=0&max=20";
             AddTooltip(element, allprofRatingsURL, realFullName, profRating, numRatings, easyRating, dept);
         } else {
-            const middleNamesString = middleNames.join('+');
+            let middleNamesString = middleNames.join('+');
             // Try again with only the maiden name of a hyphenated last name
             if (lastName.includes("-")) {
                 lastName = lastName.split('-')[0];
@@ -77,11 +77,11 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, runAgain, index);
             }
             // Try again with the middle names as the last name (Spanish surnames)
-            // Start off with all middle names to catch particles such as "de", "y", and "la"
             else if (originalMiddleNames.length > 0 && runAgain) {
-                middleNames = [...originalMiddleNames];
+                middleNames = [...originalMiddleNames]
+                middleNamesString = middleNames.join('+');
                 url = urlBase + firstName + "+" + middleNamesString + "+AND+schoolid_s%3A807";
-                middleNames.pop();
+                middleNames.pop(); // Remove any name particles such as "de", "y", and "la"
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, middleNames.length > 0, index);
             }
             // Try again with the middle name as the first name
