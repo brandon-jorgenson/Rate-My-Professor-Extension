@@ -36,6 +36,12 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
         const doc = resp.response.docs[0];
         // Add professor data if found
         if (numFound > 0 && doc) {
+            // Use middle names in attempt to narrow down matches
+            if (numFound > 1 && middleNamesString === '') {
+                middleNamesString = middleNames.join('+');
+                GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
+                    runAgain, index, middleNamesPopLast, middleNamesPopFirst, middleNameAsFirst);
+            }
             const profID = doc.pk_id;
             const realFullName = doc.teacherfullname_s;
             const dept = doc.teacherdepartment_s;
