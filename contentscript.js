@@ -3,26 +3,8 @@ const nicknames = getNicknames();
 // Add professor ratings
 const urlBase = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
 document.arrive('.col-xs-2 [href*="mailto:"]', function(){
-    let fullName = replaceCustomNicknames(this.textContent);
-    fullName = nlp(fullName).normalize({
-        whitespace: true, 
-        case: true, 
-        punctuation: false, 
-        unicode: true,
-        contractions: false,
-        acronyms: false, 
-        parentheses: false, 
-        possessives: true, 
-        plurals: false,
-        verbs: false,  
-        honorifics: true}).out();
-    let splitName = fullName.split(' ');
-    const parsedFullName = nlp(fullName).people().out();
-    const parsedSplitName = parsedFullName.split(' ');
-    if (parsedSplitName.length > 1) {
-        fullName = parsedFullName;
-        splitName = parsedSplitName;
-    }
+    const fullName = replaceCustomNicknames(this.textContent);
+    const splitName = fullName.split(' ');
     const firstName = splitName[0].toLowerCase().trim();
     const lastName = splitName.slice(-1)[0].toLowerCase().trim();
     let middleNames = [];
