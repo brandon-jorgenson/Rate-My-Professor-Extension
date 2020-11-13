@@ -5,7 +5,7 @@
 	"permissions": ["https://search-production.ratemyprofessors.com/*"],
 	"content_scripts": [ {
 		"css": [ "tooltipster/dist/css/tooltipster.main.min.css", "tooltip.css" ],
-		"js": [ "jquery-3.3.1.min.js", "node_modules/papaparse/papaparse.min.js", "names.js", "addedNicknames.js", "arrive.min.js", "tooltipster/dist/js/tooltipster.bundle.min.js" ,"background.js", "contentscript.js" ],
+		"js": [ "jquery-3.3.1.min.js", "node_modules/compromise/builds/compromise.js", "node_modules/papaparse/papaparse.min.js", "names.js", "addedNicknames.js", "arrive.min.js", "tooltipster/dist/js/tooltipster.bundle.min.js" ,"background.js", "contentscript.js" ],
 		"matches": [ "https://tigercenter.rit.edu/tigerCenterApp/api/class-search*" ]
 	  }],
 	"background": {
