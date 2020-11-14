@@ -113,7 +113,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                     true, index, middleNamesPopLast, middleNamesPopFirst, true); // Try again with nicknames for this name
             }
             // Try again with middle names
-            else if (middleNamesString === ''){
+            else if (middleNamesString === '' && originalMiddleNames.length > 0){
                 middleNamesString = middleNames.join('+');
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                     runAgain, index, middleNamesPopLast, middleNamesPopFirst, middleNameAsFirst);
