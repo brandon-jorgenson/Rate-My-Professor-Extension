@@ -68,7 +68,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             }
             // Try again with different middle and last names
             else if (middleNamesString !== '' && middleNames.length > 0) {
-                // Try all combos of last middle name removed
+                // Try all combos of right-most middle name removed
                 if (!middleNamesPopLast) {
                     url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
                     middleNames.pop();
@@ -79,7 +79,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                     GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                         runAgain, index, middleNamesPopLast, middleNamesPopFirst, middleNameAsFirst);
                 }
-                // Try all combos of first middle name removed
+                // Try all combos of left-most middle name removed
                 else if (!middleNamesPopFirst) {
                     url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
                     middleNames.shift();
@@ -94,7 +94,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                     // Try again with the middle names as the last name (Maiden name and Spanish surnames)
                     middleNamesString = middleNames.join('+');
                     url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + "AND+schoolid_s%3A807";
-                    middleNames.pop(); // Remove any name particles such as "de", "y", and "la"
+                    middleNames.pop(); // Try all combos of right-most middle name removed
                     GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                         runAgain, index, middleNamesPopLast, middleNamesPopFirst, middleNameAsFirst);    
                 }
