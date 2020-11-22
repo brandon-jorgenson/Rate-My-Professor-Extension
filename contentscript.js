@@ -38,7 +38,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             if (numFound > 1 && middleNamesString === '') {
                 middleNamesString = middleNames.join('+');
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                    runAgain, index, middleNamesRemovalStep, middleNameAsFirst);
+                    runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
             }
             else {
                 const profID = doc.pk_id;
@@ -62,7 +62,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 lastName = lastName.split('-')[0];
                 url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                    runAgain, index, middleNamesRemovalStep, middleNameAsFirst);
+                    runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
             }
             // Try again with different middle and last names combos
             else if (middleNamesString !== '' && middleNames.length > 0) {
@@ -75,7 +75,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                         middleNames = [...originalMiddleNames]; // Restore for next step
                     }
                     GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                        runAgain, index, middleNamesRemovalStep, middleNameAsFirst);
+                        runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
                 }
                 // Try every combo of left-most middle name removed
                 else if (middleNamesRemovalStep === 1) {
@@ -86,7 +86,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                         middleNames = [...originalMiddleNames]; // Restore for next step
                     }
                     GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                        runAgain, index, middleNamesRemovalStep, middleNameAsFirst);
+                        runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
                 }
                 else {
                     // Try again with the middle names as the last name (Maiden name and Spanish surnames)
@@ -103,27 +103,27 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                         middleNames.shift(); // Try every combo of left-most middle name removed
                     }
                     GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                        runAgain, index, middleNamesRemovalStep, middleNameAsFirst);    
+                        runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);    
                 }
             }
             // Try again with nicknames for the first name
             else if (runAgain && nicknames[originalFirstName]) {
                 url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, nicknames[originalFirstName][index], originalFirstName, 
-                    middleNames, originalMiddleNames, nicknames[originalFirstName][index+1], index+1, middleNamesRemovalStep, middleNameAsFirst);
+                    middleNames, originalMiddleNames, nicknames[originalFirstName][index+1], index+1, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
             }            
             // Try again with the middle name as the first name
             else if (middleNamesString !== ''  && originalMiddleNames.length > 0 && !middleNameAsFirst) {
                 firstName = originalMiddleNames[0];
                 url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                    true, index, middleNamesRemovalStep, true); // Try again with nicknames for this name
+                    true, index, middleNamesRemovalStep, true, middleNamesString); // Try again with nicknames for this name
             }
             // Try again with middle names
             else if (middleNamesString === '' && originalMiddleNames.length > 0){
                 middleNamesString = middleNames.join('+');
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
-                    runAgain, index, middleNamesRemovalStep, middleNameAsFirst);
+                    runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
             }
             // Set link to search results if not found
             else {
