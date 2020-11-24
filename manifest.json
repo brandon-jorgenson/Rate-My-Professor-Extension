@@ -1,6 +1,6 @@
 {
 	"name" : "Rate My Professors for RIT Tiger Center",
-	"version" : "1.1.5",
+	"version" : "1.1.6",
 	"description" : "Shows the Rate My Professors rating of professors while searching classes on Tiger Center.",
 	"permissions": ["https://search-production.ratemyprofessors.com/*"],
 	"content_scripts": [ {
