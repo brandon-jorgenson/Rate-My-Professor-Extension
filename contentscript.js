@@ -1,4 +1,11 @@
-const nicknames = getNicknames();
+let nicknames = JSON.parse(localStorage.getItem("nicknames"));
+
+// Refresh nicknames and Airtable records from background fetch
+chrome.runtime.onMessage.addListener(function(message) {
+    const fetchedNicknames = message.nicknames;
+    localStorage.setItem("nicknames", JSON.stringify(fetchedNicknames));
+    savedNicknames = JSON.parse(localStorage.getItem("nicknames"));
+    });
 
 // Add professor ratings
 const urlBase = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
