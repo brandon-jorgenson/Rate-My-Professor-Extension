@@ -9,8 +9,8 @@ chrome.runtime.onMessage.addListener(function(message) {
 
 // Add professor ratings
 const urlBase = "https://search-production.ratemyprofessors.com/solr/rmp/select/?solrformat=true&rows=2&wt=json&q=";
-document.arrive('.col-xs-2 [href*="mailto:"]', function(){
-    const fullName = replaceCustomNicknames(this.textContent);
+document.arrive('#sectionTable > tbody > tr > td:nth-child(4)', function(){
+    const fullName = this.textContent;
     const splitName = fullName.split(' ');
     const firstName = splitName[0].toLowerCase().trim();
     const lastName = splitName.slice(-1)[0].toLowerCase().trim();
@@ -21,7 +21,7 @@ document.arrive('.col-xs-2 [href*="mailto:"]', function(){
         originalMiddleNames = [...middleNames];
     }
     const middleNamesString = '';
-    url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807"; // Try with no middle names at first
+    url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A135"; // Try with no middle names at first
     const runAgain = true;
     const originalFirstName = firstName;
     const originalLastName = lastName;
@@ -67,7 +67,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             // Try again with only the maiden name of a hyphenated last name
             if (lastName.includes("-")) {
                 lastName = lastName.split('-')[0];
-                url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
+                url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A135";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                     runAgain, index, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
             }
@@ -75,7 +75,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             else if (middleNamesString !== '' && middleNames.length > 0) {
                 // Try every combo of right-most middle name removed
                 if (middleNamesRemovalStep === 0) {
-                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
+                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A135";
                     middleNames.pop();
                     if (middleNames.length === 0) {
                         middleNamesRemovalStep = 1;
@@ -86,7 +86,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 }
                 // Try every combo of left-most middle name removed
                 else if (middleNamesRemovalStep === 1) {
-                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A807";
+                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + lastName + "+AND+schoolid_s%3A135";
                     middleNames.shift();
                     if (middleNames.length === 0) {
                         middleNamesRemovalStep = 2;
@@ -98,7 +98,7 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
                 else {
                     // Try again with the middle names as the last name (Maiden name and Spanish surnames)
                     middleNamesString = middleNames.join('+');
-                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + "AND+schoolid_s%3A807";
+                    url = urlBase + firstName + "+" + (middleNamesString === '' ? '' : middleNamesString + "+") + "AND+schoolid_s%3A135";
                     if (middleNamesRemovalStep === 2) {
                         middleNames.pop(); // Try every combo of right-most middle name removed
                         if(middleNameAsFirst.length === 0) {
@@ -115,14 +115,14 @@ function GetProfessorRating(url, element, fullName, lastName, originalLastName, 
             }
             // Try again with nicknames for the first name
             else if (runAgain && nicknames[originalFirstName]) {
-                url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A807";
+                url = urlBase + nicknames[originalFirstName][index] + "+" + lastName + "+AND+schoolid_s%3A135";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, nicknames[originalFirstName][index], originalFirstName, 
                     middleNames, originalMiddleNames, nicknames[originalFirstName][index+1], index+1, middleNamesRemovalStep, middleNameAsFirst, middleNamesString);
             }            
             // Try again with the middle name as the first name
             else if (middleNamesString !== ''  && originalMiddleNames.length > 0 && !middleNameAsFirst) {
                 firstName = originalMiddleNames[0];
-                url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A807";
+                url = urlBase + firstName + "+" + lastName + "+AND+schoolid_s%3A135";
                 GetProfessorRating(url, element, fullName, lastName, originalLastName, firstName, originalFirstName, middleNames, originalMiddleNames, 
                     true, index, middleNamesRemovalStep, true, middleNamesString); // Try again with nicknames for this name
             }
