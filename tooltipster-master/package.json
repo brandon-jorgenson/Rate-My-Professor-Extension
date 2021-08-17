@@ -5,7 +5,7 @@
 		"url" : "http://calebjacob.com"
 	},
 	"bugs": {
-		"url": "https://github.com/iamceege/tooltipster/issues"
+		"url": "https://github.com/calebjacob/tooltipster/issues"
 	},
 	"description": "A flexible and extensible jQuery plugin for modern tooltips.",
 	"devDependencies": {
@@ -17,9 +17,9 @@
 		"grunt-contrib-cssmin": "1.0.1",
 		"grunt-contrib-uglify": "1.0.1",
 		"grunt-string-replace": "1.2.1",
-		"grunt-umd": "2.3.6"
+		"grunt-umd": "3.0.0"
 	},
-	"homepage": "https://github.com/iamceege/tooltipster",
+	"homepage": "https://github.com/calebjacob/tooltipster",
 	"keywords": [
 		"ecosystem:jquery",
 		"jquery-plugin",
@@ -44,5 +44,5 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"version": "4.2.6"
+	"version": "4.2.8"
 }
